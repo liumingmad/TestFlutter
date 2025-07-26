@@ -12,10 +12,17 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("flutter_module/build/host/outputs/repo")
+        }
+        maven {
+            val storageUrl = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: "https://storage.googleapis.com"
+            url = uri("$storageUrl/download.flutter.io")
+        }
     }
 }
 
