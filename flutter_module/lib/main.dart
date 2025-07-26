@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'platform_service.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  // 确保Flutter绑定已初始化
+  WidgetsFlutterBinding.ensureInitialized();
+  // 设置平台通道处理器
+  PlatformService.setupMethodCallHandler();
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,15 +19,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in a Flutter IDE). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -47,16 +47,49 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _deviceInfo = 'No device info';
+  String _lastMessage = 'No message received';
+
+  @override
+  void initState() {
+    super.initState();
+    // 设置消息接收回调
+    PlatformService.onMessageReceived = (message) {
+      setState(() {
+        _lastMessage = message;
+      });
+    };
+  }
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+  
+  void _getDeviceInfo() async {
+    final info = await PlatformService.getDeviceInfo();
+    setState(() {
+      _deviceInfo = info?.toString() ?? 'Failed to get device info';
+    });
+  }
+  
+  void _calculateSum() async {
+    final sum = await PlatformService.calculateSum(10, 25);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sum of 10 + 25 = ${sum ?? 'Error'}')),
+      );
+    }
+  }
+  
+  void _showToast() async {
+    final result = await PlatformService.showToast('Hello from Flutter!');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result ?? 'Failed to show toast')),
+      );
+    }
   }
 
   @override
@@ -85,33 +118,115 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
         ),
-        body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Counter: $_counter', 
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _incrementCounter,
+                        child: const Text('Increment Counter'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Platform Channel Demo', 
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _getDeviceInfo,
+                          child: const Text('Get Device Info (Dart → Kotlin)'),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _calculateSum,
+                          child: const Text('Calculate Sum (Dart → Kotlin)'),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _showToast,
+                          child: const Text('Show Toast (Dart → Kotlin)'),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      Text(
+                        'Device Info:', 
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(
+                          _deviceInfo, 
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      Text(
+                        'Last Message from Kotlin:', 
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blue),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(
+                          _lastMessage, 
+                          style: const TextStyle(fontSize: 12, color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
