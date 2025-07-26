@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
                                 startActivity(
                                     FlutterActivity
                                         .withCachedEngine("my_engine_id")
+                                        .destroyEngineWithActivity(false)
                                         .build(this@MainActivity)
                                 )
                             }

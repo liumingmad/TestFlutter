@@ -27,8 +27,12 @@
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:exported="false"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.TestFlutter" />
+            android:theme="@style/Theme.TestFlutter"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
     </application>
 
 </manifest>
