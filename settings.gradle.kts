@@ -17,9 +17,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url = uri("flutter_module/build/host/outputs/repo")
-        }
-        maven {
             val storageUrl = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: "https://storage.googleapis.com"
             url = uri("$storageUrl/download.flutter.io")
         }
@@ -28,3 +25,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "TestFlutter"
 include(":app")
+
+// Flutter module integration
+apply(from = File(settingsDir, "flutter_module/.android/include_flutter.groovy"))
