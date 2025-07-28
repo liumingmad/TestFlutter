@@ -26,6 +26,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        create("profile") {
+            initWith(getByName("debug"))
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -37,17 +40,13 @@ android {
     buildFeatures {
         compose = true
     }
-    
-    buildTypes {
-        create("profile") {
-            initWith(getByName("debug"))
-        }
-    }
 }
 
 dependencies {
-    // Flutter module dependency
-    implementation(project(":flutter"))
+    // Flutter module AAR dependencies  
+    debugImplementation("com.example.flutter_module:flutter_debug:1.0")
+    "profileImplementation"("com.example.flutter_module:flutter_profile:1.0")
+    releaseImplementation("com.example.flutter_module:flutter_release:1.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
