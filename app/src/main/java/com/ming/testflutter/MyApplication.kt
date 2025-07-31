@@ -8,6 +8,7 @@ import io.flutter.embedding.engine.dart.DartExecutor
 class MyApplication : Application() {
     lateinit var flutterEngine: FlutterEngine
     lateinit var platformChannelHandler: PlatformChannelHandler
+    lateinit var eventChannelHandler: EventChannelHandler
 
     override fun onCreate() {
         super.onCreate()
@@ -17,6 +18,7 @@ class MyApplication : Application() {
         
         // 创建平台通道处理器
         platformChannelHandler = PlatformChannelHandler(this)
+        eventChannelHandler = EventChannelHandler(this)
         
         // 启动Dart Isolate
         flutterEngine.dartExecutor.executeDartEntrypoint(
@@ -25,6 +27,7 @@ class MyApplication : Application() {
         
         // 设置平台通道
         platformChannelHandler.setupChannel(flutterEngine)
+        eventChannelHandler.setupChannel(flutterEngine)
         
         // 缓存Flutter引擎
         FlutterEngineCache

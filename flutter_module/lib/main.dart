@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_module/battery.dart';
 import 'platform_service.dart';
 
 void main() {
+  print("main start");
   // 确保Flutter绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
   // 设置平台通道处理器
   PlatformService.setupMethodCallHandler();
   runApp(const MyApp());
+  print("main end");
 }
 
 class MyApp extends StatelessWidget {
@@ -137,6 +140,19 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: _incrementCounter,
                         child: const Text('Increment Counter'),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      BatteryWidget(),
                     ],
                   ),
                 ),
